@@ -39,10 +39,17 @@ public class MmsThumbnailPresenter extends Presenter {
 
     @Override
     public void present() {
-        SlideModel slide = ((SlideshowModel) mModel).get(0);
-        if (slide != null) {
-            presentFirstSlide((SlideViewInterface) mView, slide);
-        }
+		int i;
+        SlideModel slide;
+		for (i=0;; i++) {
+        	slide = ((SlideshowModel) mModel).get(i);
+			if (slide == null)
+				break;
+			if (slide.hasImage() || slide.hasVideo() || slide.hasAudio()) {
+				presentFirstSlide((SlideViewInterface) mView, slide);
+				break;
+			}
+		}
     }
 
     private void presentFirstSlide(SlideViewInterface view, SlideModel slide) {
