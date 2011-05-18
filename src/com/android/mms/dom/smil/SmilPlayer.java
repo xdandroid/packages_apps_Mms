@@ -642,6 +642,7 @@ public class SmilPlayer implements Runnable {
     }
 
     public void run() {
+        long lastbeg = 0;
         if (isStoppedState()) {
             return;
         }
@@ -652,10 +653,17 @@ public class SmilPlayer implements Runnable {
         int size = mAllEntries.size();
         for (mCurrentElement = 0; mCurrentElement < size; mCurrentElement++) {
             TimelineEntry entry = mAllEntries.get(mCurrentElement);
-            if (isBeginOfSlide(entry)) {
-                mCurrentSlide = mCurrentElement;
-            }
             long offset = (long) (entry.getOffsetTime() * 1000); // in ms.
+            if (isBeginOfSlide(entry)) {
+                lastbeg = offset;
+                mCurrentSlide = mCurrentElement;
+            } else if (offset == lastbeg
+                    && (entry.getElement() instanceof SmilParElementImpl)) {
+                /* If entry has zero duration, pause it */
+                mAction = SmilPlayerAction.PAUSE;
+                actionPause();
+                waitForWakeUp();
+            }
             while (offset > mCurrentTime) {
                 try {
                     waitForEntry(offset - mCurrentTime);
